@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "preview": "npm run build && cp ./index.html ./dist/index.html && vite preview --port=4001"
+    "install-embeddedchat-trick": "cp -r ../dist ./node_modules/embeddedchat",
+    "preview": "npm run install-embeddedchat-trick && npm run build && cp ./index.html ./dist/index.html && vite preview --port=4001"
   },
   "dependencies": {
     "embeddedchat": "^0.0.2",
