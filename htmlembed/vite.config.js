@@ -6,21 +6,13 @@ import path from 'path';
 export default defineConfig({
   plugins: [react(), cssInjectedByJsPlugin()],
   build: {
-    minify: false,
+    minify: true,
     cssCodeSplit: false,
     lib: {
       entry: path.resolve(__dirname, 'src/EmbeddedChatEmbed.jsx'),
       name: 'EmbeddedChatEmbed',
       formats: ['umd'],
       fileName: () => 'embeddedchat.js',
-    },
-    define: {
-      'process.env': {}
-    },
-    // rollupOptions: {
-    //   input: {
-    //     app: "./src/EmbeddedChatEmbed.jsx",
-    //   },
-    // },
+    }
   },
 })
