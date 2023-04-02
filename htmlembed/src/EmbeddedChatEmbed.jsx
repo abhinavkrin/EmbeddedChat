@@ -12,5 +12,3 @@ const EmbeddedChatEmbed = {
 	}
 }
 export default EmbeddedChatEmbed
-
-window.EmbeddedChatEmbed = EmbeddedChatEmbed;
