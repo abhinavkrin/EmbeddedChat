@@ -1,4 +1,9 @@
 ## TO RUN
+In / directory
+```
+npm install
+npm run build
+```
 In /htmlembed directory
 ```
 npm install
