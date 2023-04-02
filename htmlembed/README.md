@@ -1,6 +1,6 @@
 ## TO RUN
+In /htmlembed directory
 ```
-cd htmlembed
 npm install
 npm run preview
 ```
