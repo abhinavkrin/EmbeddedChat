@@ -175,3 +175,5 @@ RCComponent.propTypes = {
   showAvatar: PropTypes.bool,
   enableThreads: PropTypes.bool,
 };
+
+export default RCComponent;

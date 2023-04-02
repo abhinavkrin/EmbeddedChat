@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React</title>
+  </head>
+  <body>
+    <div>
+      <div class="embeddedchat"></div>
+      <script>
+        /**
+         * Currently a hack for embeddedchat html embedd, since process.env was somehow encountered in RCComponent
+         * */
+        const process = {
+          env: {
+            REACT_APP_RC_HOST:'http://localhost:3000',
+            REACT_APP_RC_ROOM_ID:'GENERAL'
+          }
+        }
+      </script>
+      <script src="http://127.0.0.1:4001/embeddedchat.js"></script>
+      <script>
+        const config = {
+          // all props for the EmbeddedChat of @embeddedchat/react will go here
+          // the config will be directly applied as props for the EmbeddedChat Component
+          "host": "http://localhost:3000",
+          "roomId": "GENERAL",
+          "moreOpts": true,
+          "channelName": "general",
+          "anonymousMode": true,
+          "headerColor": "white",
+          "toastBarPosition": "bottom-end",
+          "showRoles": true,
+          "showAvatar": false,
+          "enableThreads": true
+        }
+        EmbeddedChatEmbed.start(config)
+      </script>
+    </div>
+  </body>
+</html>
