@@ -298,7 +298,7 @@ const Message = ({
                   onClick={() => handlePinMessage(message)}
                 />
               )}
-              {message.u._id === authenticatedUserId && (
+              {message.u?._id === authenticatedUserId && (
                 <>
                   <MessageToolbox.Item
                     icon="edit"

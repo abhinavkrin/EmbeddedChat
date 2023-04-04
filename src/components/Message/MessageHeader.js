@@ -26,15 +26,15 @@ const MessageHeader = ({ message }) => {
     }
   };
 
-  const userRoles = roles[message.u.username]
-    ? roles[message.u.username].roles
+  const userRoles = roles[message.u?.username]
+    ? roles[message.u?.username].roles
     : null;
 
   if (!message.t) {
     return (
       <Message.Header>
         <Message.Name>{message.u?.name}</Message.Name>
-        <Message.Username>@{message.u.username}</Message.Username>
+        <Message.Username>@{message.u?.username}</Message.Username>
         {userRoles
           ? userRoles.map((role, index) => (
               <Message.Role key={index}>
@@ -54,7 +54,7 @@ const MessageHeader = ({ message }) => {
 
   return (
     <Message.Header>
-      <Message.Name>@{message.u.username} </Message.Name>
+      <Message.Name>@{message.u?.username} </Message.Name>
       <Message.Username style={{ marginLeft: '2px' }}>
         {userActions()}
       </Message.Username>
