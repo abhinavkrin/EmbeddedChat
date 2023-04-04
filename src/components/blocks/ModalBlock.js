@@ -65,7 +65,19 @@ function ModalBlock({ view, errors, onSubmit, onClose, onCancel }) {
   return (
     <AnimatedVisibility visibility={AnimatedVisibility.UNHIDING}>
       <FocusScope contain restoreFocus autoFocus>
-        <Modal open id={id} ref={ref}>
+        <Modal
+          open
+          id={id}
+          ref={ref}
+          style={{
+            position: 'fixed',
+            zIndex: 1000,
+            top: '50%',
+            left: '50%',
+            maxHeight: '80vh',
+            transform: 'translate(-50%, -50%)',
+          }}
+        >
           <Modal.Header>
             <Modal.Title>{modalParser.text(view.title)}</Modal.Title>
             <Modal.Close tabIndex={-1} onClick={onClose} />
