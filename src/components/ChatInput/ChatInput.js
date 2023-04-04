@@ -222,10 +222,12 @@ const ChatInput = () => {
         ) : (
           <></>
         )}
-        <CommandsList
-          filteredCommands={filteredCommands}
-          execCommand={execCommand}
-        />
+        {filteredCommands.length === 0 ? null : (
+          <CommandsList
+            filteredCommands={filteredCommands}
+            execCommand={execCommand}
+          />
+        )}
         <Box className={styles.container}>
           <textarea
             rows={1}
