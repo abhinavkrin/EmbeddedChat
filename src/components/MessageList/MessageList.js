@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { isSameDay } from 'date-fns';
 import { Box, Button, Icon } from '@rocket.chat/fuselage';
+
 import {
   useMessageStore,
   useMemberStore,

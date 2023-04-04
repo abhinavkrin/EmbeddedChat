@@ -19,6 +19,7 @@ export default class RocketChatInstance {
     this.onMessageDeleteCallbacks = [];
     this.onTypingStatusCallbacks = [];
     this.typingUsers = [];
+    this.onActionTriggeredCallbacks = [];
   }
 
   getCookies() {
@@ -190,6 +191,19 @@ export default class RocketChatInstance {
           this.onMessageDeleteCallbacks.map((callback) => callback(messageId));
         }
       });
+      await this.rcClient.subscribeNotifyUser();
+      await this.rcClient.onStreamData('stream-notify-user', (ddpMessage) => {
+        const [, event] = ddpMessage.fields.eventName.split('/');
+        if (event === 'message') {
+          const message = ddpMessage.fields.args[0];
+          if (message?.rid !== this.rid) {
+            return;
+          }
+          message.renderType = 'blocks';
+          message.ts = message.ts.$date;
+          this.onMessageCallbacks.map((callback) => callback(message));
+        }
+      });
     } catch (err) {
       await this.close();
     }
@@ -206,6 +220,23 @@ export default class RocketChatInstance {
 
   async removeMessageListener(callback) {
     this.onMessageCallbacks = this.onMessageCallbacks.filter(
+      (c) => c !== callback
+    );
+  }
+
+  async addActionTriggeredListener(callback) {
+    const idx = this.onActionTriggeredCallbacks.findIndex(
+      (c) => c === callback
+    );
+    if (idx !== -1) {
+      this.onActionTriggeredCallbacks[idx] = callback;
+    } else {
+      this.onActionTriggeredCallbacks.push(callback);
+    }
+  }
+
+  async removeActionTriggeredListener(callback) {
+    this.onActionTriggeredCallbacks = this.onActionTriggeredCallbacks.filter(
       (c) => c !== callback
     );
   }
@@ -348,6 +379,81 @@ export default class RocketChatInstance {
     } catch (err) {
       console.error(err.message);
     }
+  }
+
+  async triggerBlockAction({
+    type,
+    actionId,
+    appId,
+    rid,
+    mid,
+    viewId,
+    container,
+    ...rest
+  }) {
+    try {
+      const triggerId = Math.random().toString(32).slice(2, 16);
+
+      const payload = rest.payload || rest;
+
+      const response = await fetch(
+        `${this.host}/api/apps/ui.interaction/${appId}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Auth-Token': Cookies.get(RC_USER_TOKEN_COOKIE),
+            'X-User-Id': Cookies.get(RC_USER_ID_COOKIE),
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            type: 'blockAction',
+            actionId,
+            payload,
+            container,
+            mid,
+            rid,
+            triggerId,
+            viewId,
+          }),
+        }
+      );
+      const data = await response.json();
+      this.onActionTriggeredCallbacks.map((cb) => cb(data));
+      return data;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async getCommandsList() {
+    const response = await fetch(`${this.host}/api/v1/commands.list`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth-Token': Cookies.get(RC_USER_TOKEN_COOKIE),
+        'X-User-Id': Cookies.get(RC_USER_ID_COOKIE),
+      },
+      method: 'GET',
+    });
+    const data = await response.json();
+    return data;
+  }
+
+  async execCommand({ command }) {
+    const response = await fetch(`${this.host}/api/v1/commands.run`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Auth-Token': Cookies.get(RC_USER_TOKEN_COOKIE),
+        'X-User-Id': Cookies.get(RC_USER_ID_COOKIE),
+      },
+      method: 'POST',
+      body: JSON.stringify({
+        command,
+        roomId: this.rid,
+        triggerId: Math.random().toString(32).slice(2, 20),
+      }),
+    });
+    const data = await response.json();
+    return data;
   }
 
   async realtime(callback) {

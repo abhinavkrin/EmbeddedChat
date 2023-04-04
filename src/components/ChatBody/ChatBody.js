@@ -12,6 +12,7 @@ import { useRCAuth } from '../../hooks/useRCAuth';
 import LoginForm from '../auth/LoginForm';
 import useAttachmentWindowStore from '../../store/attachmentwindow';
 import ThreadMessageList from '../Thread/ThreadMessageList';
+import ModalBlock from '../blocks/ModalBlock';
 
 const ChatBody = ({ height, anonymousMode, showRoles, GOOGLE_CLIENT_ID }) => {
   const { RCInstance, ECOptions } = useContext(RCContext);
@@ -119,11 +120,25 @@ const ChatBody = ({ height, anonymousMode, showRoles, GOOGLE_CLIENT_ID }) => {
     [upsertMessage, ECOptions?.enableThreads]
   );
 
+  const [isModalOpen, setModalOpen] = useState();
+  const [viewData, setViewData] = useState();
+  const onActionTriggerResponse = useCallback((data) => {
+    if (data.type === 'modal.open' || data.type === 'modal.update') {
+      setViewData(data.view);
+      setModalOpen(true);
+    }
+  }, []);
+  const onModalClose = () => {
+    setModalOpen(false);
+    setViewData(null);
+  };
+
   useEffect(() => {
     if (isUserAuthenticated) {
       RCInstance.connect().then(() => {
         RCInstance.addMessageListener(addMessage);
         RCInstance.addMessageDeleteListener(removeMessage);
+        RCInstance.addActionTriggeredListener(onActionTriggerResponse);
       });
       getMessagesAndRoles();
     } else {
@@ -134,6 +149,7 @@ const ChatBody = ({ height, anonymousMode, showRoles, GOOGLE_CLIENT_ID }) => {
       RCInstance.close();
       RCInstance.removeMessageListener(addMessage);
       RCInstance.removeMessageDeleteListener(removeMessage);
+      RCInstance.removeActionTriggeredListener(onActionTriggerResponse);
     };
   }, [isUserAuthenticated, getMessagesAndRoles, addMessage, removeMessage]);
 
@@ -199,6 +215,14 @@ const ChatBody = ({ height, anonymousMode, showRoles, GOOGLE_CLIENT_ID }) => {
         handleLogin={handleLogin}
       />
       <LoginForm />
+      {isModalOpen && (
+        <ModalBlock
+          appId={viewData.appId}
+          onClose={onModalClose}
+          onCancel={onModalClose}
+          view={viewData}
+        />
+      )}
     </Box>
   );
 };

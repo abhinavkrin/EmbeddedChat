@@ -17,9 +17,23 @@ import { searchToMentionUser } from '../../lib/searchToMentionUser';
 import TypingUsers from '../TypingUsers';
 import createPendingMessage from '../../lib/createPendingMessage';
 import { parseEmoji } from '../../lib/emoji';
+import CommandsList from '../CommandsList/CommandsList';
 
 const ChatInput = () => {
   const { RCInstance, ECOptions } = useContext(RCContext);
+  const [commands, setCommands] = useState([]);
+  useEffect(() => {
+    RCInstance.getCommandsList()
+      .then((data) => setCommands(data.commands))
+      .catch(console.error);
+  }, [RCInstance]);
+  const [filteredCommands, setFilteredCommands] = useState([]);
+  const getFilteredCommands = (cmd) =>
+    commands.filter((c) => c.command.startsWith(cmd.replace('/', '')));
+  const execCommand = async (command) => {
+    await RCInstance.execCommand(command);
+    setFilteredCommands([]);
+  };
   const inputRef = useRef(null);
   const typingRef = useRef();
   const messageRef = useRef();
@@ -208,6 +222,10 @@ const ChatInput = () => {
         ) : (
           <></>
         )}
+        <CommandsList
+          filteredCommands={filteredCommands}
+          execCommand={execCommand}
+        />
         <Box className={styles.container}>
           <textarea
             rows={1}
@@ -240,6 +258,18 @@ const ChatInput = () => {
                 setshowMembersList
               );
               sendTypingStart();
+            }}
+            onKeyUp={(e) => {
+              const cursor = e.target.selectionStart;
+              const word = e.target.value
+                .slice(0, cursor + 1)
+                .split(' ')
+                .pop();
+              if (word && word.startsWith('/')) {
+                setFilteredCommands(getFilteredCommands(word));
+              } else {
+                setFilteredCommands([]);
+              }
             }}
             onBlur={sendTypingStop}
             onKeyDown={(e) => {

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
   Box,
@@ -16,6 +16,11 @@ import Cookies from 'js-cookie';
 import { useToastBarDispatch } from '@rocket.chat/fuselage-toastbar';
 import { format, formatDistance } from 'date-fns';
 import { useMediaQuery } from '@rocket.chat/fuselage-hooks';
+import {
+  UiKitComponent,
+  UiKitModal,
+  kitContext,
+} from '@rocket.chat/fuselage-ui-kit';
 import { isSameUser, serializeReactions } from '../../lib/reaction';
 import { Attachments } from '../Attachments';
 import { EmojiPicker } from '../EmojiPicker/index';
@@ -120,6 +125,28 @@ const Message = ({
     return URL;
   };
 
+  const context = useMemo(
+    () => ({
+      action: async ({ actionId, value, blockId, appId }) => {
+        await RCInstance?.triggerBlockAction({
+          blockId,
+          actionId,
+          value,
+          mid: message._id,
+          rid: RCInstance.rid,
+          appId,
+          container: {
+            type: 'message',
+            id: message._id,
+          },
+        });
+      },
+      appId: message.blocks && message.blocks[0] && message.blocks[0].appId,
+      rid: RCInstance.rid,
+    }),
+    []
+  );
+
   return (
     <Box className={classes.messageParentBox} key={message._id}>
       <RCMessage
@@ -160,6 +187,14 @@ const Message = ({
                       </>
                     ) : (
                       <Markdown body={message} isReaction={false} />
+                    )}
+                    {message.blocks && (
+                      <kitContext.Provider value={context} mid={message.mid}>
+                        <UiKitComponent
+                          render={UiKitModal}
+                          blocks={message.blocks}
+                        />
+                      </kitContext.Provider>
                     )}
                   </RCMessage.Body>
 
